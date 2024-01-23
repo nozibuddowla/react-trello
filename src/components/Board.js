@@ -33,14 +33,26 @@ const Board = ({ onAddList, onAddTask, onDragEnd }) => {
     }
   };
 
+  const handleAddTask = (listId, taskTitle) => {
+    setLists((prevLists) => {
+      return prevLists.map((list) =>
+        list.id === listId
+          ? {
+              ...list,
+              cards: [...list.cards, { id: Date.now(), title: taskTitle }],
+            }
+          : list
+      );
+    });
+  };
+
   return (
     <div className="flex p-8 overflow-x-auto">
       {lists.map((list) => (
         <List
           key={list.id}
-          title={list.title}
-          cards={list.cards}
-          onAddTask={(title) => onAddTask(list.id, title)}
+          list={list} // Pass the entire list object
+          onAddTask={handleAddTask}
           onDragEnd={onDragEnd}
         />
       ))}

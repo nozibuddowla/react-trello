@@ -46,9 +46,24 @@ function App() {
     }
   };
 
+  const onAddTask = (listId, taskTitle) => {
+    // Logic to add a task to the specified list
+    setLists((prevLists) => {
+      // Find the list with the matching ID and add the new task
+      return prevLists.map((list) =>
+        list.id === listId
+          ? {
+              ...list,
+              cards: [...list.cards, { id: Date.now(), title: taskTitle }],
+            }
+          : list
+      );
+    });
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-blue-900">
-      <Board lists={lists} onAddList={onAddList} />
+      <Board lists={lists} onAddList={onAddList} onAddTask={onAddTask} />
     </div>
   );
 }
