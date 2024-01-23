@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import List from "./List";
 
-const Board = ({ lists, onAddList, onAddTask, onDragEnd }) => {
+const Board = ({ onAddList, onAddTask, onDragEnd }) => {
+  const [lists, setLists] = useState(() => {
+    // Use a function to initialize the state with the lists from localStorage
+    const storedLists = localStorage.getItem("lists");
+    return storedLists ? JSON.parse(storedLists) : [];
+  });
+
   const [newListTitle, setNewListTitle] = useState("");
 
   useEffect(() => {
@@ -11,7 +17,18 @@ const Board = ({ lists, onAddList, onAddTask, onDragEnd }) => {
 
   const handleAddList = () => {
     if (newListTitle.trim() !== "") {
+      // Create a new list object
+      const newList = {
+        id: Date.now(), // Using timestamp as a simple unique identifier
+        title: newListTitle,
+        cards: [],
+      };
+      // Update the lists state with the new list
+      setLists((prevLists) => [...prevLists, newList]);
+
       onAddList(newListTitle);
+
+      // Clear the input field
       setNewListTitle("");
     }
   };
@@ -34,11 +51,11 @@ const Board = ({ lists, onAddList, onAddTask, onDragEnd }) => {
           value={newListTitle}
           onChange={(e) => setNewListTitle(e.target.value)}
           placeholder="New List Title"
-          className="mb-2 p-2 border rounded"
+          className="mb-2 p-2 rounded"
         />
         <button
           onClick={handleAddList}
-          className="bg-blue-500 text-white p-2 rounded"
+          className="bg-cyan-700 text-white p-2 rounded"
         >
           Add a List
         </button>
