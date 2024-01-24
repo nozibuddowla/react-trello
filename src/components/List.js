@@ -1,5 +1,6 @@
 import React from "react";
 import Card from "./Card";
+import { FaPlus } from "react-icons/fa";
 
 const List = ({ list, onAddTask, onDragEnd }) => {
   // Add a check for undefined list
@@ -29,9 +30,10 @@ const List = ({ list, onAddTask, onDragEnd }) => {
       ))}
       <button
         onClick={handleAddTask}
-        className="mt-4 bg-green-500 text-white p-2 rounded"
+        className="mt-4 text-white flex content-center justify-between "
       >
-        Add a Task
+        <FaPlus />
+        <span>Add a card</span>
       </button>
     </div>
   );

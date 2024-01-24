@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import List from "./List";
+import { FaPlus } from "react-icons/fa";
 
 const Board = ({ onAddList, onAddTask, onDragEnd }) => {
   const [lists, setLists] = useState(() => {
@@ -67,9 +68,9 @@ const Board = ({ onAddList, onAddTask, onDragEnd }) => {
         />
         <button
           onClick={handleAddList}
-          className="bg-cyan-700 text-white p-2 rounded"
+          className="bg-cyan-700 text-white p-3 rounded"
         >
-          Add a List
+          <FaPlus />
         </button>
       </div>
     </div>
