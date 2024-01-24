@@ -12,8 +12,12 @@ const Board = ({ onAddList, onAddTask, onDragEnd }) => {
   const [newListTitle, setNewListTitle] = useState("");
 
   useEffect(() => {
-    // Save lists to localStorage whenever it changes
-    localStorage.setItem("lists", JSON.stringify(lists));
+    try {
+      // Save lists to localStorage whenever it changes
+      localStorage.setItem("lists", JSON.stringify(lists));
+    } catch (error) {
+      console.error("Error saving to localStorage:", error);
+    }
   }, [lists]);
 
   const handleAddList = () => {
@@ -47,6 +51,40 @@ const Board = ({ onAddList, onAddTask, onDragEnd }) => {
     });
   };
 
+  const dragEndFunction = (result) => {
+    if (!result.destination) return; // Dragged outside of droppable area
+
+    const sourceListId = parseInt(result.source.droppableId, 10);
+    const destinationListId = parseInt(result.destination.droppableId, 10);
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+
+    if (sourceListId === destinationListId) {
+      // Reorder cards in the same list
+      setLists((prevLists) => {
+        const newList = [...prevLists];
+        const updatedList = { ...newList[sourceListId] };
+        const [removed] = updatedList.cards.splice(sourceIndex, 1);
+        updatedList.cards.splice(destinationIndex, 0, removed);
+        newList[sourceListId] = updatedList;
+        return newList;
+      });
+    } else {
+      // Move card to a different list
+      setLists((prevLists) => {
+        const sourceList = { ...prevLists[sourceListId] };
+        const destinationList = { ...prevLists[destinationListId] };
+        const [movedCard] = sourceList.cards.splice(sourceIndex, 1);
+        destinationList.cards.splice(destinationIndex, 0, movedCard);
+
+        const newList = [...prevLists];
+        newList[sourceListId] = sourceList;
+        newList[destinationListId] = destinationList;
+        return newList;
+      });
+    }
+  };
+
   return (
     <div className="flex p-8 overflow-x-auto">
       {lists.map((list) => (
@@ -54,7 +92,7 @@ const Board = ({ onAddList, onAddTask, onDragEnd }) => {
           key={list.id}
           list={list} // Pass the entire list object
           onAddTask={handleAddTask}
-          onDragEnd={onDragEnd}
+          onDragEnd={dragEndFunction}
         />
       ))}
 

@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import Card from "./Card";
 import { FaPlus } from "react-icons/fa";
+import ReactModal from "react-modal";
+import TaskModalContent from "./TaskModalContent ";
 
 const List = ({ list, onAddTask, onDragEnd }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   // Add a check for undefined list
   if (!list) {
     return (
@@ -14,19 +25,14 @@ const List = ({ list, onAddTask, onDragEnd }) => {
   const { id, title, cards } = list;
 
   const handleAddTask = () => {
-    const taskTitle = prompt("Enter task title:");
-    if (taskTitle) {
-      onAddTask(id, taskTitle);
-    }
+    openModal();
   };
-  const handleDragEnd = (result) => {
-    onDragEnd(result, id);
-  };
+
   return (
-    <div className="flex-none w-80 p-4 bg-gray-950 rounded mr-4 overflow-y-auto">
+    <div className="flex-none w-80 p-4 bg-gray-950 rounded mr-4 overflow-y-auto list">
       <h2 className="text-lg text-white font-semibold mb-2">{title}</h2>
       {cards.map((card, index) => (
-        <Card key={card.id} card={card} index={index} />
+        <Card key={card.id} card={card} index={index} onDragEnd={onDragEnd} />
       ))}
       <button
         onClick={handleAddTask}
@@ -35,6 +41,16 @@ const List = ({ list, onAddTask, onDragEnd }) => {
         <FaPlus />
         <span>Add a card</span>
       </button>
+      <ReactModal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="Add Task Modal"
+      >
+        <TaskModalContent
+          onAddTask={(title) => onAddTask(id, title)}
+          onClose={closeModal}
+        />
+      </ReactModal>
     </div>
   );
 };
