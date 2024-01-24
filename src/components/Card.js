@@ -1,39 +1,28 @@
 import React from "react";
-import { Draggable, Droppable } from "react-beautiful-dnd";
+import { Draggable } from "react-beautiful-dnd";
 
 const Card = ({ card, index }) => {
-  const { id, title, description, dueDate, attachments } = card;
+  const { title, description, dueDate, attachments } = card;
   return (
-    <Droppable droppableId={String(id)}>
+    <Draggable draggableId={String(card.id)} index={index}>
       {(provided) => (
-        <div ref={provided.innerRef} {...provided.droppableProps}>
-          <Draggable draggableId={String(id)} index={index}>
-            {(provided) => (
-              <div
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                ref={provided.innerRef}
-                className="mb-4 p-2 bg-white rounded shadow card"
-              >
-                <h3 className="text-lg font-semibold mb-2">{title}</h3>
-                {description && (
-                  <p className="text-gray-600 mb-2">{description}</p>
-                )}
-                {dueDate && (
-                  <p className="text-gray-600 mb-2">Due Date: {dueDate}</p>
-                )}
-                {attachments && (
-                  <div>
-                    <strong>Attachments:</strong> {attachments}
-                  </div>
-                )}
-              </div>
-            )}
-          </Draggable>
-          {provided.placeholder}
+        <div
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          ref={provided.innerRef}
+          className="mb-4 p-2 bg-white rounded shadow card"
+        >
+          <h3 className="text-lg font-semibold mb-2">{title}</h3>
+          {description && <p className="text-gray-600 mb-2">{description}</p>}
+          {dueDate && <p className="text-gray-600 mb-2">Due Date: {dueDate}</p>}
+          {attachments && (
+            <div>
+              <strong>Attachments:</strong> {attachments}
+            </div>
+          )}
         </div>
       )}
-    </Droppable>
+    </Draggable>
   );
 };
 
