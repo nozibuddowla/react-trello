@@ -5,7 +5,7 @@ import ReactModal from "react-modal";
 import TaskModalContent from "./TaskModalContent ";
 import { Droppable } from "react-beautiful-dnd";
 
-const List = ({ list, onAddTask, onDragEnd }) => {
+const List = ({ list, onAddTask }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => {
     setIsModalOpen(true);

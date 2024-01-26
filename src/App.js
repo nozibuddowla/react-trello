@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import Board from "./components/Board";
+import { v4 as uuidv4 } from "uuid";
 
 function App() {
   const initialLists = [
@@ -50,14 +51,21 @@ function App() {
     // Logic to add a task to the specified list
     setLists((prevLists) => {
       // Find the list with the matching ID and add the new task
-      return prevLists.map((list) =>
+      const updatedLists = prevLists.map((list) =>
         list.id === listId
           ? {
               ...list,
-              cards: [...list.cards, { id: Date.now(), title: taskTitle }],
+              cards: [
+                ...list.cards,
+                {
+                  id: uuidv4(),
+                  title: taskTitle,
+                },
+              ],
             }
           : list
       );
+      return updatedLists;
     });
   };
 

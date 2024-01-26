@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import List from "./List";
 import { FaPlus } from "react-icons/fa";
+import { DragDropContext } from "react-beautiful-dnd";
 
-const Board = ({ onAddList, onAddTask, onDragEnd }) => {
+const Board = ({ onAddList, onAddTask }) => {
   const [lists, setLists] = useState(() => {
     // Use a function to initialize the state with the lists from localStorage
     const storedLists = localStorage.getItem("lists");
@@ -53,6 +54,7 @@ const Board = ({ onAddList, onAddTask, onDragEnd }) => {
 
   const dragEndFunction = (result) => {
     if (!result.destination) return; // Dragged outside of droppable area
+    if (!result.source) return;
 
     const sourceListId = parseInt(result.source.droppableId, 10);
     const destinationListId = parseInt(result.destination.droppableId, 10);
@@ -60,6 +62,15 @@ const Board = ({ onAddList, onAddTask, onDragEnd }) => {
     const destinationIndex = result.destination.index;
 
     if (sourceListId === destinationListId) {
+      if (
+        isNaN(sourceListId) ||
+        isNaN(destinationListId) ||
+        isNaN(sourceIndex) ||
+        isNaN(destinationIndex)
+      ) {
+        console.error("Invalid source or destination in dragEndFunction");
+        return;
+      }
       // Reorder cards in the same list
       setLists((prevLists) => {
         const newList = [...prevLists];
@@ -87,14 +98,16 @@ const Board = ({ onAddList, onAddTask, onDragEnd }) => {
 
   return (
     <div className="flex p-8 overflow-x-auto">
-      {lists.map((list) => (
-        <List
-          key={list.id}
-          list={list} // Pass the entire list object
-          onAddTask={handleAddTask}
-          onDragEnd={dragEndFunction}
-        />
-      ))}
+      <DragDropContext onDragEnd={dragEndFunction}>
+        {lists.map((list) => (
+          <List
+            key={list.id}
+            list={list} // Pass the entire list object
+            onAddTask={handleAddTask}
+            onDragEnd={dragEndFunction}
+          />
+        ))}
+      </DragDropContext>
 
       <div className="flex-none w-80 p-4 bg-slate-600 rounded mr-4">
         <input
