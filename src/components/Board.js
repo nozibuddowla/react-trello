@@ -53,7 +53,7 @@ const Board = ({ onAddList, onAddTask }) => {
   };
 
   const dragEndFunction = (result) => {
-    if (!result.destination) return; // Dragged outside of droppable area
+    if (!result.destination || !lists[result.destination.droppableId]) return; // Dragged outside of droppable area
     if (!result.source) return;
 
     const sourceListId = parseInt(result.source.droppableId, 10);
@@ -61,39 +61,28 @@ const Board = ({ onAddList, onAddTask }) => {
     const sourceIndex = result.source.index;
     const destinationIndex = result.destination.index;
 
-    if (sourceListId === destinationListId) {
-      if (
-        isNaN(sourceListId) ||
-        isNaN(destinationListId) ||
-        isNaN(sourceIndex) ||
-        isNaN(destinationIndex)
-      ) {
-        console.error("Invalid source or destination in dragEndFunction");
-        return;
-      }
-      // Reorder cards in the same list
-      setLists((prevLists) => {
-        const newList = [...prevLists];
+    setLists((prevLists) => {
+      const newList = [...prevLists];
+
+      if (sourceListId === destinationListId) {
+        // Reorder cards in the same list
         const updatedList = { ...newList[sourceListId] };
         const [removed] = updatedList.cards.splice(sourceIndex, 1);
         updatedList.cards.splice(destinationIndex, 0, removed);
         newList[sourceListId] = updatedList;
-        return newList;
-      });
-    } else {
-      // Move card to a different list
-      setLists((prevLists) => {
-        const sourceList = { ...prevLists[sourceListId] };
-        const destinationList = { ...prevLists[destinationListId] };
+      } else {
+        // Move card to a different list
+        const sourceList = { ...newList[sourceListId] };
+        const destinationList = { ...newList[destinationListId] };
         const [movedCard] = sourceList.cards.splice(sourceIndex, 1);
         destinationList.cards.splice(destinationIndex, 0, movedCard);
 
-        const newList = [...prevLists];
         newList[sourceListId] = sourceList;
         newList[destinationListId] = destinationList;
-        return newList;
-      });
-    }
+      }
+
+      return newList;
+    });
   };
 
   return (

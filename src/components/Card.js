@@ -2,6 +2,7 @@ import React from "react";
 import { Draggable } from "react-beautiful-dnd";
 
 const Card = ({ card, index }) => {
+  console.log(`Rendering card ${card.id}`);
   const { title, description, dueDate, attachments } = card;
   return (
     <Draggable draggableId={String(card.id)} index={index}>
