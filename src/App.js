@@ -2,29 +2,9 @@ import { useState } from "react";
 import "./App.css";
 import Board from "./components/Board";
 import { v4 as uuidv4 } from "uuid";
+import { initialLists } from "./initialLists";
 
 function App() {
-  const initialLists = [
-    {
-      id: 1,
-      title: "To Do",
-      cards: [
-        { id: 1, title: "Task 1" },
-        { id: 2, title: "Task 2" },
-      ],
-    },
-    {
-      id: 2,
-      title: "In Progress",
-      cards: [{ id: 3, title: "Task 3" }],
-    },
-    {
-      id: 3,
-      title: "Done",
-      cards: [{ id: 4, title: "Task 4" }],
-    },
-  ];
-
   // State for managing lists
   const [lists, setLists] = useState(initialLists);
 

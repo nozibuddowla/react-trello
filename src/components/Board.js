@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import List from "./List";
 import { FaPlus } from "react-icons/fa";
-import { DragDropContext } from "react-beautiful-dnd";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 
 const Board = ({ onAddList, onAddTask }) => {
   const [lists, setLists] = useState(() => {
@@ -25,7 +25,7 @@ const Board = ({ onAddList, onAddTask }) => {
     if (newListTitle.trim() !== "") {
       // Create a new list object
       const newList = {
-        id: Date.now(), // Using timestamp as a simple unique identifier
+        id: `${Date.now()}`, // Using timestamp as a simple unique identifier
         title: newListTitle,
         cards: [],
       };
@@ -53,66 +53,126 @@ const Board = ({ onAddList, onAddTask }) => {
   };
 
   const dragEndFunction = (result) => {
-    if (!result.destination || !lists[result.destination.droppableId]) return; // Dragged outside of droppable area
-    if (!result.source) return;
+    const { destination, source } = result;
+    const draggableId =
+      source.droppableId === destination.droppableId
+        ? source.draggableId
+        : `${source.droppableId}-${source.draggableId}`;
+    if (!destination) return; // Dragged outside of droppable area
+    const newLists = [...lists];
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      const list = newLists.find((list) => list.id === source.droppableId);
 
-    const sourceListId = parseInt(result.source.droppableId, 10);
-    const destinationListId = parseInt(result.destination.droppableId, 10);
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
+      // Remove the card from the source index and insert it at the destination index
+      const [removedCard] = list.cards.splice(source.index, 1);
+      list.cards.splice(destination.index, 0, removedCard);
+    } else {
+      const sourceList = newLists.find(
+        (list) => list.id === source.droppableId
+      );
+      const destinationList = newLists.find(
+        (list) => list.id === destination.droppableId
+      );
 
-    setLists((prevLists) => {
-      const newList = [...prevLists];
+      // Remove the card from the source list and insert it into the destination list
+      const [movedCard] = sourceList.cards.splice(source.index, 1);
+      destinationList.cards.splice(destination.index, 0, movedCard);
+    }
 
-      if (sourceListId === destinationListId) {
-        // Reorder cards in the same list
-        const updatedList = { ...newList[sourceListId] };
-        const [removed] = updatedList.cards.splice(sourceIndex, 1);
-        updatedList.cards.splice(destinationIndex, 0, removed);
-        newList[sourceListId] = updatedList;
-      } else {
-        // Move card to a different list
-        const sourceList = { ...newList[sourceListId] };
-        const destinationList = { ...newList[destinationListId] };
-        const [movedCard] = sourceList.cards.splice(sourceIndex, 1);
-        destinationList.cards.splice(destinationIndex, 0, movedCard);
+    const startList = lists.find((list) => list.id === source.droppableId);
+    const finishList = lists.find(
+      (list) => list.id === destination.droppableId
+    );
 
-        newList[sourceListId] = sourceList;
-        newList[destinationListId] = destinationList;
-      }
+    // Moving within the same list
+    if (startList === finishList) {
+      const newList = Array.from(startList.cardIds);
+      newList.splice(source.index, 1);
+      newList.splice(destination.index, 0, draggableId);
 
-      return newList;
-    });
+      const updatedList = {
+        ...startList,
+        cardIds: newList,
+      };
+
+      setLists((prevLists) =>
+        prevLists.map((list) =>
+          list.id === updatedList.id ? updatedList : list
+        )
+      );
+      return;
+    }
+
+    // Moving from one list to another
+    const startCardIds = Array.from(startList.cards);
+
+    startCardIds.splice(source.index, 1);
+    const newStart = {
+      ...startList,
+      cardIds: startCardIds,
+    };
+
+    const finishCardIds = Array.from(finishList.cardIds);
+    finishCardIds.splice(destination.index, 0, draggableId);
+    const newFinish = {
+      ...finishList,
+      cardIds: finishCardIds,
+    };
+
+    setLists((prevLists) =>
+      prevLists.map((list) => {
+        if (list.id === newStart.id) {
+          return newStart;
+        } else if (list.id === newFinish.id) {
+          return newFinish;
+        } else {
+          return list;
+        }
+      })
+    );
   };
 
   return (
     <div className="flex p-8 overflow-x-auto">
-      <DragDropContext onDragEnd={dragEndFunction}>
-        {lists.map((list) => (
-          <List
-            key={list.id}
-            list={list} // Pass the entire list object
-            onAddTask={handleAddTask}
-            onDragEnd={dragEndFunction}
+      <DragDropContext
+        onDragEnd={dragEndFunction}
+        className="flex p-8 overflow-x-auto"
+      >
+        <div className="flex overflow-x-auto p-4 space-x-4">
+          {lists.map((list) => (
+            <Droppable key={list.id} droppableId={list.id}>
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  <List
+                    list={list}
+                    onAddTask={handleAddTask}
+                    cards={list.cards}
+                  />
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          ))}
+        </div>
+        <div className="flex-none w-80 p-4 bg-slate-600 rounded mr-4">
+          <input
+            type="text"
+            value={newListTitle}
+            onChange={(e) => setNewListTitle(e.target.value)}
+            placeholder="New List Title"
+            className="mb-2 p-2 rounded"
           />
-        ))}
+          <button
+            onClick={handleAddList}
+            className="bg-cyan-700 text-white p-3 rounded"
+          >
+            <FaPlus />
+          </button>
+        </div>
       </DragDropContext>
-
-      <div className="flex-none w-80 p-4 bg-slate-600 rounded mr-4">
-        <input
-          type="text"
-          value={newListTitle}
-          onChange={(e) => setNewListTitle(e.target.value)}
-          placeholder="New List Title"
-          className="mb-2 p-2 rounded"
-        />
-        <button
-          onClick={handleAddList}
-          className="bg-cyan-700 text-white p-3 rounded"
-        >
-          <FaPlus />
-        </button>
-      </div>
     </div>
   );
 };
